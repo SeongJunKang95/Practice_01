@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 
 ASpartaPlayerController::ASpartaPlayerController()
@@ -94,6 +95,31 @@ void ASpartaPlayerController::ShowMainMenu(bool bIsRestart)
            }
         }
 
+        if (bIsRestart)
+        {
+            UFunction* PlayAnimFunc = MainMenuWidgetInstance->FindFunction(FName("PlayGameOverAnim"));
+            if (PlayAnimFunc)
+            {
+                MainMenuWidgetInstance->ProcessEvent(PlayAnimFunc, nullptr);
+            }
+            if (UTextBlock* TotalScoreText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName("TotalScoreText")))
+            {
+                if (USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(UGameplayStatics::GetGameInstance(this)))
+                {
+                    TotalScoreText->SetText(FText::FromString(
+                        FString::Printf(TEXT("Total Score: %d"), SpartaGameInstance->TotalScore)
+                    ));
+                }
+            }
+
+            if (UButton* ReturnButton = Cast<UButton>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("ReturnToMainMenuButton"))))
+            {
+                ReturnButton->SetVisibility(ESlateVisibility::Visible);
+                ReturnButton->OnClicked.Clear();  // 기존 이벤트 제거
+                ReturnButton->OnClicked.AddDynamic(this, &ASpartaPlayerController::ReturnToMainMenu);
+            }
+        }
+
     }
    
 }
@@ -120,6 +146,7 @@ void ASpartaPlayerController::ShowGameHUD()
         {
             HUDWidgetInstance->AddToViewport();
 
+            // 게임 화면에서는 마우스 클릭 비활성화
             bShowMouseCursor = false;
             SetInputMode(FInputModeGameOnly());
 
@@ -133,6 +160,7 @@ void ASpartaPlayerController::ShowGameHUD()
     }
 }
 
+
 // 게임 시작 - BasicLevel 오픈, GameInstance 데이터 리셋
 void ASpartaPlayerController::StartGame()
 {
@@ -142,6 +170,17 @@ void ASpartaPlayerController::StartGame()
         SpartaGameInstance->TotalScore = 0;
 
         UGameplayStatics::OpenLevel(GetWorld(), FName("BasicLevel"));
-          
+        SetPause(false);
     }
+}
+// 게임 종료 기능 추가
+void ASpartaPlayerController::QuitGame()
+{
+    UKismetSystemLibrary::QuitGame(GetWorld(), this, EQuitPreference::Quit, false);
+}
+
+// 게임 오버 화면에서 메인 메뉴로 돌아가기
+void ASpartaPlayerController::ReturnToMainMenu()
+{
+    UGameplayStatics::OpenLevel(GetWorld(), FName("MenuLevel"));
 }

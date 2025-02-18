@@ -29,7 +29,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item|Component")
 	UStaticMeshComponent* StaticMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effects")
+	UParticleSystem* PickupParticle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effects")
+	USoundBase* PickupSound;
 
 	// 플레이어가 이 아이템의 범위에 들어왔을 때 호출
 	

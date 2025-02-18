@@ -7,6 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+#include "Components/TextBlock.h"
+#include "SpartaGameState.h"
+
 
 ASpartaCharacter::ASpartaCharacter()
 {// Tick 함수는 우선 꺼둡니다.
@@ -28,6 +32,11 @@ ASpartaCharacter::ASpartaCharacter()
     // 카메라는 스프링 암의 회전을 따르므로 PawnControlRotation은 꺼둠
     CameraComp->bUsePawnControlRotation = false;
 
+    OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
+    OverheadWidget->SetupAttachment(GetMesh());
+    OverheadWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+
     NormalSpeed = 600.0f;
     SprintSpeedMultiplier = 1.5f;
     SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
@@ -40,6 +49,11 @@ ASpartaCharacter::ASpartaCharacter()
 
 }
 
+void ASpartaCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+    UpdateOverheadHP();
+}
 
 
 void ASpartaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -198,6 +212,7 @@ void ASpartaCharacter::AddHealth(float Amount)
     // 체력을 회복시킴. 최대 체력을 초과하지 않도록 제한함
     Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
     UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), Health);
+    UpdateOverheadHP();
 }
 
 // 데미지 처리 함수
@@ -209,6 +224,7 @@ float ASpartaCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
     // 체력을 데미지만큼 감소시키고, 0 이하로 떨어지지 않도록 Clamp
     Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
     UE_LOG(LogTemp, Warning, TEXT("Health decreased to: %f"), Health);
+    UpdateOverheadHP();
 
     // 체력이 0 이하가 되면 사망 처리
     if (Health <= 0.0f)
@@ -223,7 +239,22 @@ float ASpartaCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 // 사망 처리 함수
 void ASpartaCharacter::OnDeath()
 {
-    UE_LOG(LogTemp, Error, TEXT("Character is Dead!"));
+    ASpartaGameState* SpartaGameState = GetWorld() ? GetWorld()->GetGameState<ASpartaGameState>() : nullptr;
+    if (SpartaGameState)
+    {
+        SpartaGameState->OnGameOver();
+    }
+}
 
-    // 사망 후 로직
+void ASpartaCharacter::UpdateOverheadHP()
+{
+    if (!OverheadWidget) return;
+
+    UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+    if (!OverheadWidgetInstance) return;
+
+    if (UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadHP"))))
+    {
+        HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), Health, MaxHealth)));
+    }
 }

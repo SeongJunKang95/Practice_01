@@ -58,6 +58,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
 
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void QuitGame(); // 게임 종료 기능 추가
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ReturnToMainMenu(); // 게임 오버 화면에서 메인 메뉴로 이동
+
+
 protected:
 	virtual void BeginPlay() override;
 };

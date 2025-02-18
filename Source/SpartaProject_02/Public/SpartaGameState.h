@@ -21,8 +21,9 @@ public:
 	int32 SpawnedCoinCount;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Coin")
 	int32 CollectedCoinCount;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
-	float LevelDuration;
+
+	//Level 관련
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	int32 CurrentLevelIndex;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
@@ -30,7 +31,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	TArray<FName> LevelMapNames;
 
-	FTimerHandle LevelTimerHandle;
+	//Wave 관련
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave")
+	float WaveDuration;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wave")
+	int32 CurrentWaveIndex;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wave")
+	int32 MaxWaves;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave")
+	TArray<int32> CoinsToSpawnPerWave; // int타입으로 변경
+
+
+	
+	FTimerHandle WaveTimerHandle;
 	FTimerHandle HUDUpdateTimerHandle;
 	
 
@@ -43,9 +56,11 @@ public:
 	void OnGameOver();
 
 	void StartLevel();
-	void OnLevelTimeUp();
-	void OnCoinCollected();
 	void EndLevel();
+	void StartWave();
+	void EndWave();
+	void OnWaveTimeUp();
+	void OnCoinCollected();
 	void UpdateHUD();
 };
 

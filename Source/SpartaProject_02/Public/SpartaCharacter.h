@@ -6,6 +6,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UWidgetComponent;
 // Enhanced Input에서 액션 값을 받을 때 사용하는 구조체
 struct FInputActionValue;
 
@@ -23,6 +24,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camear")
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* OverheadWidget;
+
 	UFUNCTION(BlueprintPure, Category = "Health")
 	float GetHealth() const;
 
@@ -37,6 +41,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
 	float Health;
 
+	virtual void BeginPlay() override;
 	// 입력 바인딩을 처리할 함수
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -61,7 +66,10 @@ protected:
 	void StopSprint(const FInputActionValue& value);
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	virtual void OnDeath();
+
+
+	void OnDeath();
+	void UpdateOverheadHP();
 
 private:
 	// 이동 속도 관련 프로퍼티들

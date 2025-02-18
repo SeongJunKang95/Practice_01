@@ -13,6 +13,9 @@ public:
 	ACoinItem();
 
 protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effects")
+	USoundBase* CoinItemSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 PointValue;
 
